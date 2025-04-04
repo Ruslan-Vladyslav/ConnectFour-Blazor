@@ -1,12 +1,13 @@
 ﻿@inject GameState State
+@using System.Drawing
 
 
 <HeadContent>
     <style>
         :root {
-            --board-bg: yellow;  /** the board color **/
-            --player1: red;      /** Player 1's color **/
-            --player2: blue;     /** Player 2's color **/
+            --board-bg: @ColorTranslator.ToHtml(BoardColor);
+            --player1: @ColorTranslator.ToHtml(Player1Color);
+            --player2: @ColorTranslator.ToHtml(Player2Color);
         }
     </style>
 </HeadContent>
@@ -49,6 +50,15 @@
 
     private string CurrentTurn => (winnerMessage == string.Empty) ? $"Player {State.PlayerTurn}'s Turn" : "";
     private string ResetStyle => (winnerMessage == string.Empty) ? "display: none;" : "";
+
+    [Parameter]
+    public Color BoardColor { get; set; } = ColorTranslator.FromHtml("yellow");
+
+    [Parameter]
+    public Color Player1Color { get; set; } = ColorTranslator.FromHtml("red");
+
+    [Parameter]
+    public Color Player2Color { get; set; } = ColorTranslator.FromHtml("blue");
 
 
     private void PlayPiece(byte col)
