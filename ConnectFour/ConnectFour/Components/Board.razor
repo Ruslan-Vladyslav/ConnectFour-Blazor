@@ -1,4 +1,5 @@
 ﻿@inject GameState State
+@inject IJSRuntime JS
 @using System.Drawing
 
 
@@ -12,52 +13,94 @@
     </style>
 </HeadContent>
 
-<div class="d-flex flex-column justify-content-center align-items-center text-center">
-    <nav>
-        @for (byte i = 0; i < 7; i++)
-        {
-            var col = i;
-            <span title="Click to play a piece"
-                  @onclick="() => PlayPiece(col)"
-                  style="cursor: @(isAnimating ? "not-allowed" : "pointer");
-                     opacity: @(isAnimating ? 0.3 : 1)">
-                🔽
-            </span>
-        }
-    </nav>
 
-    <article>
-        @winnerMessage  <button style="@ResetStyle" @onclick="ResetGame">Reset the game</button>
+<div class="d-flex justify-content-between align-items-center text-center" style="width: 100%; height: 100%;">
+    <div class="d-flex flex-column justify-content-center align-items-center" style="flex-basis: 30%; text-align: center;">
+        <p class="mb-1 mt-5" style="font-size: 25px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;">Player 1 pieces</p>
+        <div style="position: relative; display: inline-block;">
+            <span style="width: 60px; height: 60px; border-radius: 50%;
+                    background-color: var(--player1);
+                    margin-left: 12px; display: inline-flex;
+                    justify-content: center; align-items: center;
+                    font-weight: bold; font-size: 24px;">
+                @Player1_pieces
+            </span>
+        </div>
+
+        <p class="mt-4 mb-1" style="font-size: 25px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;">Player 2 pieces</p>
+        <div style="position: relative; display: inline-block;">
+            <span style="width: 60px; height: 60px; border-radius: 50%;
+                    background-color: var(--player2);
+                    margin-left: 12px; display: inline-flex;
+                    justify-content: center; align-items: center;
+                    font-weight: bold; font-size: 24px;">
+                @Player2_pieces
+            </span>
+        </div>
+
         <br />
-        <div class="text-center font-weight-bold" style="font-size: 30px; color: #FF0000; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); font-weight: bold;">
-            @errorMessage
-        </div>
+        <button class="btn btn-dark mt-4"
+                @onclick="NavigateToRules"
+                style="width: 200px; font-size: 18px; border-radius: 30px;">
+            Game rules
+        </button>
+        <button class="btn btn-dark mt-4"
+                @onclick="ResetGame"
+                disabled="@string.IsNullOrEmpty(winnerMessage)"
+                style="width: 200px; font-size: 18px; border-radius: 30px;">
+            Restart the game
+        </button>
+    </div>
 
-        <div class="text-center font-weight-bold" style="font-size: 30px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;">
-            @CurrentTurn
+    <div class="d-flex flex-column justify-content-center align-items-center" style="flex-basis: 70%; text-align: center;">
+        <article class="mb-3">
+            <div class="text-center font-weight-bold" style="font-size: 30px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;">
+                @CurrentTurn
+            </div>
 
-            <span style="width: 20px; height: 20px; border-radius: 50%;
-                    background-color: @(State.PlayerTurn == 1 ? "var(--player1)" : (State.PlayerTurn == 2 ? "var(--player2)" : "transparent"));
-                    margin-left: 12px; display: inline-block;">
-            </span>
-        </div>
-    </article>
+            <div class="text-center font-weight-bold" style="font-size: 30px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;">
+                @winnerMessage
+            </div>
+        </article>
 
-    <div>
-        <div class="board">
-            @for (var i = 0; i < 42; i++)
+        <nav>
+            @for (byte i = 0; i < 7; i++)
             {
-                <span class="container">
-                    <span></span>
+                var col = i;
+                <span title="Click to play a piece"
+                      @onclick="() => PlayPiece(col)"
+                      style="cursor: @(isAnimating ? "not-allowed" : "pointer");
+                             opacity: @(isAnimating ? 0.3 : 1)">
+                    🔽
                 </span>
             }
+        </nav>
+
+        <div>
+            <div class="board">
+                @for (var i = 0; i < 42; i++)
+                {
+                    <span class="container">
+                        <span></span>
+                    </span>
+                }
+            </div>
+            @for (var i = 0; i < 42; i++)
+            {
+                <span class="@pieces[i]"></span>
+            }
+
+            <div class="mt-3 text-center font-weight-bold"
+                 style="font-size: 30px; height: 40px; color: #FF0000; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); font-weight: bold;">
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    @errorMessage
+                }
+            </div>
         </div>
-        @for (var i = 0; i < 42; i++)
-        {
-            <span class="@pieces[i]"></span>
-        }
     </div>
 </div>
+
 
 
 @code {
@@ -67,10 +110,11 @@
     private string errorMessage = string.Empty;
 
     private string CurrentTurn => (winnerMessage == string.Empty) ? $"Player {State.PlayerTurn}'s Turn" : "";
-    private string ResetStyle => (winnerMessage == string.Empty) ? "display: none;" : "";
 
     private bool isAnimating = false;
 
+    private int Player1_pieces = 0;
+    private int Player2_pieces = 0;
 
     [Parameter]
     public Color BoardColor { get; set; } = ColorTranslator.FromHtml("yellow");
@@ -99,6 +143,11 @@
 
             pieces[turn] = $"player{player} col{col} drop{landingRow}";
 
+            if (player == 1)
+                Player1_pieces++;
+            else
+                Player2_pieces++;
+
             await Task.Delay(1500);
 
             winnerMessage = State.CheckForWin() switch
@@ -116,14 +165,18 @@
         finally
         {
             isAnimating = false;
-            StateHasChanged(); 
+            StateHasChanged();
         }
     }
-
 
     protected override void OnInitialized()
     {
         State.ResetBoard();
+    }
+
+    private async Task NavigateToRules()
+    {
+        await JS.InvokeVoidAsync("openInNewTab", "/counter");
     }
 
     void ResetGame()
@@ -132,5 +185,7 @@
         winnerMessage = string.Empty;
         errorMessage = string.Empty;
         pieces = new string[42];
+        Player1_pieces = 0;
+        Player2_pieces = 0;
     }
-}
+} 
