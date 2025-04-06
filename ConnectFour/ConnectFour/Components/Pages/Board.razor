@@ -1,6 +1,11 @@
-﻿@inject GameState State
+﻿@page "/game"
+@rendermode InteractiveServer
+
+@inject GameState State
 @inject IJSRuntime JS
 @using System.Drawing
+
+<PageTitle>ConnectFourGame</PageTitle>
 
 
 <HeadContent>
@@ -117,7 +122,7 @@
     private int Player2_pieces = 0;
 
     [Parameter]
-    public Color BoardColor { get; set; } = ColorTranslator.FromHtml("yellow");
+    public Color BoardColor { get; set; } = ColorTranslator.FromHtml("black");
 
     [Parameter]
     public Color Player1Color { get; set; } = ColorTranslator.FromHtml("red");
@@ -176,7 +181,7 @@
 
     private async Task NavigateToRules()
     {
-        await JS.InvokeVoidAsync("openInNewTab", "/counter");
+        await JS.InvokeVoidAsync("openInNewTab", "/rules");
     }
 
     void ResetGame()
