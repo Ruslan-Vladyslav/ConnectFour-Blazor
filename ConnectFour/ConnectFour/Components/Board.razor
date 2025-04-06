@@ -12,33 +12,51 @@
     </style>
 </HeadContent>
 
-
-<nav>
-    @for (byte i = 0; i < 7; i++)
-    {
-        var col = i;
-        <span title="Click to play a piece" @onclick="() => PlayPiece(col)">🔽</span>
-    }
-</nav>
-<article>
-    @winnerMessage  <button style="@ResetStyle" @onclick="ResetGame">Reset the game</button>
-    <br />
-    <span class="alert-danger">@errorMessage</span>
-    <span class="alert-info">@CurrentTurn</span>
-</article>
-<div>
-    <div class="board">
-        @for (var i = 0; i < 42; i++)
+<div class="d-flex flex-column justify-content-center align-items-center text-center">
+    <nav>
+        @for (byte i = 0; i < 7; i++)
         {
-            <span class="container">
-                <span></span>
+            var col = i;
+            <span title="Click to play a piece"
+                  @onclick="() => PlayPiece(col)"
+                  style="cursor: @(isAnimating ? "not-allowed" : "pointer");
+                     opacity: @(isAnimating ? 0.3 : 1)">
+                🔽
             </span>
         }
+    </nav>
+
+    <article>
+        @winnerMessage  <button style="@ResetStyle" @onclick="ResetGame">Reset the game</button>
+        <br />
+        <div class="text-center font-weight-bold" style="font-size: 30px; color: #FF0000; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); font-weight: bold;">
+            @errorMessage
+        </div>
+
+        <div class="text-center font-weight-bold" style="font-size: 30px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;">
+            @CurrentTurn
+
+            <span style="width: 20px; height: 20px; border-radius: 50%;
+                    background-color: @(State.PlayerTurn == 1 ? "var(--player1)" : (State.PlayerTurn == 2 ? "var(--player2)" : "transparent"));
+                    margin-left: 12px; display: inline-block;">
+            </span>
+        </div>
+    </article>
+
+    <div>
+        <div class="board">
+            @for (var i = 0; i < 42; i++)
+            {
+                <span class="container">
+                    <span></span>
+                </span>
+            }
+        </div>
+        @for (var i = 0; i < 42; i++)
+        {
+            <span class="@pieces[i]"></span>
+        }
     </div>
-    @for (var i = 0; i < 42; i++)
-    {
-        <span class="@pieces[i]"></span>
-    }
 </div>
 
 
@@ -51,6 +69,9 @@
     private string CurrentTurn => (winnerMessage == string.Empty) ? $"Player {State.PlayerTurn}'s Turn" : "";
     private string ResetStyle => (winnerMessage == string.Empty) ? "display: none;" : "";
 
+    private bool isAnimating = false;
+
+
     [Parameter]
     public Color BoardColor { get; set; } = ColorTranslator.FromHtml("yellow");
 
@@ -61,30 +82,44 @@
     public Color Player2Color { get; set; } = ColorTranslator.FromHtml("blue");
 
 
-    private void PlayPiece(byte col)
+    private async void PlayPiece(byte col)
     {
+        if (isAnimating)
+            return;
+
         errorMessage = string.Empty;
 
         try
         {
+            isAnimating = true;
+
             var player = State.PlayerTurn;
             var turn = State.CurrentTurn;
             var landingRow = State.PlayPiece(col);
+
             pieces[turn] = $"player{player} col{col} drop{landingRow}";
+
+            await Task.Delay(1500);
+
+            winnerMessage = State.CheckForWin() switch
+            {
+                GameState.WinState.Player1_Wins => "Player 1 Wins!",
+                GameState.WinState.Player2_Wins => "Player 2 Wins!",
+                GameState.WinState.Tie => "It's a tie!",
+                _ => ""
+            };
         }
         catch (ArgumentException ex)
         {
             errorMessage = ex.Message;
         }
-
-        winnerMessage = State.CheckForWin() switch
+        finally
         {
-            GameState.WinState.Player1_Wins => "Player 1 Wins!",
-            GameState.WinState.Player2_Wins => "Player 2 Wins!",
-            GameState.WinState.Tie => "It's a tie!",
-            _ => ""
-        };
+            isAnimating = false;
+            StateHasChanged(); 
+        }
     }
+
 
     protected override void OnInitialized()
     {

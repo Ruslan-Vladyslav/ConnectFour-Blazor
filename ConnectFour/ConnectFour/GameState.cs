@@ -132,14 +132,16 @@ public class GameState
         foreach (var scenario in WinningPlaces)
         {
 
-            if (TheBoard[scenario[0]] == 0) continue;
+            int player = TheBoard[scenario[0]];
 
-            if (TheBoard[scenario[0]] ==
-                TheBoard[scenario[1]] &&
-                TheBoard[scenario[1]] ==
-                TheBoard[scenario[2]] &&
-                TheBoard[scenario[2]] ==
-                TheBoard[scenario[3]]) return (WinState)TheBoard[scenario[0]];
+            if (player != 0 &&
+                TheBoard[scenario[1]] == player &&
+                TheBoard[scenario[2]] == player &&
+                TheBoard[scenario[3]] == player)
+            {
+                return (WinState)player;
+            }
+
 
         }
 
@@ -177,7 +179,8 @@ public class GameState
 
     }
 
-    public List<int> TheBoard { get; private set; } = new List<int>(new int[42]);
+    public List<int> TheBoard { get; private set; } = Enumerable.Repeat(0, 42).ToList();
+
 
     public void ResetBoard()
     {
@@ -186,9 +189,7 @@ public class GameState
 
     private byte ConvertLandingSpotToRow(int landingSpot)
     {
-
         return (byte)(Math.Floor(landingSpot / (decimal)7) + 1);
-
     }
 
 }
