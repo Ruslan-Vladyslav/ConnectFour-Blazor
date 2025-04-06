@@ -1,8 +1,46 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
-<Board @rendermode="InteractiveServer"
-       BoardColor="System.Drawing.Color.Black"
-       Player1Color="System.Drawing.Color.Green"
-       Player2Color="System.Drawing.Color.Purple" />
+
+<button class="btn btn-dark mt-4" style="width: 200px; font-size: 18px; border-radius: 30px;" @onclick="ShowDialog">
+    Show Dialog
+</button>
+
+@if (isDialogVisible)
+{
+    <div class="dialog-overlay">
+        <div class="dialog-box">
+            <h4>Are you sure you want to continue?</h4>
+
+            <div class="button-container">
+                <div class="btn btn-dark" style="width: 200px; font-size: 18px; border-radius: 30px;">
+                    <NavLink class="nav-link" href="game" style="color: white;">
+                        <span aria-hidden="true"></span> Continue
+                    </NavLink>
+                </div>
+
+                <button class="btn btn-dark" @onclick="CloseDialog" style="width: 200px; font-size: 18px; border-radius: 30px;">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+}
+
+
+@code {
+    private bool isDialogVisible = false;
+
+    private void ShowDialog()
+    {
+        isDialogVisible = true;
+    }
+
+    private void CloseDialog()
+    {
+        isDialogVisible = false;
+    }
+}
