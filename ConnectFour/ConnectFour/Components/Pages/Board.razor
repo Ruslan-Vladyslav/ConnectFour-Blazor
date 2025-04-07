@@ -3,6 +3,7 @@
 
 @inject GamePlayer GamePlayer
 @inject GameState State
+@inject PlayerAI PlayerAI
 @inject IJSRuntime JS
 @using System.Drawing
 
@@ -115,6 +116,7 @@
     private string winnerMessage = string.Empty;
     private string errorMessage = string.Empty;
 
+    private PlayerAI botPlayer = null!;
 
 
     private string CurrentTurn => string.IsNullOrEmpty(winnerMessage)
@@ -145,8 +147,9 @@
 
             var player = State.PlayerTurn;
             var turn = State.CurrentTurn;
-            var landingRow = State.PlayPiece(col);
+            byte landingRow = 0;
 
+            landingRow = State.PlayPiece(col);
             pieces[turn] = $"player{player} col{col} drop{landingRow}";
 
             if (player == 1)
@@ -174,11 +177,17 @@
         {
             isAnimating = false;
             StateHasChanged();
+
+            if (string.IsNullOrEmpty(winnerMessage) && State.PlayerTurn == 2 && GamePlayer.Player2.IsAI)
+            {
+                PlayPiece(botPlayer.GetBestMove(PlayerAI.AiDifficulty));
+            }
         }
     }
 
     protected override void OnInitialized()
     {
+        botPlayer = new PlayerAI(State);
         State.ResetBoard();
     }
 

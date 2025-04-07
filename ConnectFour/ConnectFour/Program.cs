@@ -9,6 +9,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddSingleton<GameState>();
 builder.Services.AddSingleton<GamePlayer>();
+builder.Services.AddSingleton<PlayerAI>();
 
 var app = builder.Build();
 

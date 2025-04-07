@@ -192,4 +192,81 @@ public class GameState
         return (byte)(Math.Floor(landingSpot / (decimal)7) + 1);
     }
 
+
+
+
+    public GameState Clone()
+    {
+        return new GameState
+        {
+            TheBoard = new List<int>(this.TheBoard)
+        };
+    }
+
+    public bool TryPlayPiece(int column, out byte landingRow)
+    {
+        landingRow = 0;
+
+        if (CheckForWin() != WinState.No_Winner)
+            return false;
+
+        if (TheBoard[column] != 0)
+            return false;
+
+        var landingSpot = column;
+
+        for (var i = column; i < 42; i += 7)
+        {
+            if (landingSpot + 7 >= 42 || TheBoard[landingSpot + 7] != 0)
+                break;
+            landingSpot = i + 7;
+        }
+
+        TheBoard[landingSpot] = PlayerTurn;
+        landingRow = ConvertLandingSpotToRow(landingSpot);
+
+        return true;
+    }
+
+    public int EvaluateBoard(GameState state)
+    {
+        int score = 0;
+
+        foreach (var group in GameState.WinningPlaces)
+        {
+            var line = group.Select(pos => state.TheBoard[pos]).ToList();
+
+            int player2Count = line.Count(p => p == 2);
+            int player1Count = line.Count(p => p == 1);
+
+
+            if (player2Count > 0 && player1Count == 0)
+            {
+                //score += (int)Math.Pow(10, player2Count);
+                score += player2Count * 10;
+            }
+            else if (player1Count > 0 && player2Count == 0)
+            {
+                //score -= (int)Math.Pow(10, player1Count);
+                score -= player1Count * 10;
+            }
+        }
+
+        return score;
+    }
+
+    public List<byte> GetAvailableColumns(GameState state)
+    {
+        var freeColumn = new List<byte>();
+
+        for (byte col = 0; col < 7; col++)
+        {
+            if (state.TheBoard[col] == 0)
+            {
+                freeColumn.Add(col);
+            }
+        }
+
+        return freeColumn;
+    }
 }

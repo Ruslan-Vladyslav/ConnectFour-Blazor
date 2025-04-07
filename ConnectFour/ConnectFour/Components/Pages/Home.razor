@@ -3,6 +3,7 @@
 
 @inject NavigationManager Navigation
 @inject GamePlayer GamePlayers
+@inject PlayerAI PlayerAI
 
 <PageTitle>Home</PageTitle>
 
@@ -65,20 +66,30 @@
                     <label for="player2" class="form-label">@(GamePlayers.Player2.IsAI ? "Opponent Name" : "Player 2: Enter your name")</label>
                     <div class="d-flex align-items-center">
                         <input type="text" id="player2" class="form-control" placeholder="@(GamePlayers.Player2.IsAI ? "AI" : "Type here ...")" @bind="GamePlayers.Player2.Name" disabled="@GamePlayers.Player2.IsAI" />
-                        <select class="form-select ms-3" style="width: 160px;" @bind="GamePlayers.Player2.Color" disabled="@GamePlayers.Player2.IsAI">
-                            <option value="">Disc Color</option>
-                            <option value="Red">Red</option>
-                            <option value="Yellow">Yellow</option>
-                            <option value="Green">Green</option>
-                            <option value="Blue">Blue</option>
-                            <option value="Purple">Purple</option>
-                        </select>
+                        @if (GamePlayers.Player2.IsAI)
+                        {
+                            <select class="form-select ms-3" style="width: 160px;" @bind="PlayerAI.AiDifficulty">
+                                <option value="1">Easy</option>
+                                <option value="3">Moderate</option>
+                                <option value="6">Hard</option>
+                            </select>
+                        } else
+                        {
+                            <select class="form-select ms-3" style="width: 160px;" @bind="GamePlayers.Player2.Color" disabled="@GamePlayers.Player2.IsAI">
+                                <option value="">Disc Color</option>
+                                <option value="Red">Red</option>
+                                <option value="Yellow">Yellow</option>
+                                <option value="Green">Green</option>
+                                <option value="Blue">Blue</option>
+                                <option value="Purple">Purple</option>
+                            </select>
+                        }
                     </div>
                 </div>
 
                 @if (!string.IsNullOrEmpty(ErrorMessage))
                 {
-                    <div class="alert alert-danger">
+                    <div class="alert alert-danger text-center">
                         @ErrorMessage
                     </div>
                 }
@@ -100,7 +111,7 @@
 
 @code {
     private bool isDialogVisible = false;
-    private string ErrorMessage { get; set; } = "";
+    private string ErrorMessage { get; set; } = String.Empty;
 
 
     private void ShowDialog(bool IsAI)
@@ -109,6 +120,7 @@
         GamePlayers.Player2.Name = string.Empty;
         GamePlayers.Player1.Color = string.Empty;
         GamePlayers.Player2.Color = string.Empty;
+        ErrorMessage = string.Empty;
 
         GamePlayers.Player2.IsAI = IsAI;
 
