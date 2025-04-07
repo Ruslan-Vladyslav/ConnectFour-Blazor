@@ -10,12 +10,16 @@ nav {
     margin-left: 10px
 }
 
-    nav span {
-        width: 4em;
-        text-align: center;
-        cursor: pointer;
-        font-size: 1em
-    }
+.board-layout {
+    margin-left: 5px;
+}
+
+nav span {
+    width: 4em;
+    text-align: center;
+    cursor: pointer;
+    font-size: 1em
+}
 
 div.board {
     margin-top: 1em;
@@ -246,6 +250,46 @@ span.container {
 
     99% {
         transform: translateY(20.4em)
+    }
+}
+
+.win-cross {
+    color: black;
+    font-weight: 900;
+    padding-top: 15px;
+}
+
+
+@media (max-width: 1100px) {
+    .d-flex {
+        flex-direction: column-reverse;
+    }
+}
+
+@media (max-width: 500px) {
+    .left-class {
+        padding: 0;
+    }
+
+    .board-layout {
+        margin-left: 27px;
+    }
+
+    .nav-layout {
+        margin-left: 30px;
+    }
+
+    .board-side {
+        height: 50%;
+        flex-basis: 80%;
+    }
+
+    .board-side .content {
+        width: 100%; 
+        height: 100%; 
+        max-width: 100%;
+        max-height: 100%;
+        font-size: 3vw;
     }
 }
 
