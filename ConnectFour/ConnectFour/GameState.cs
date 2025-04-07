@@ -163,7 +163,7 @@ public class GameState
         if (CheckForWin() != 0) throw new ArgumentException("Game is over");
 
         // Check the column
-        if (TheBoard[column] != 0) throw new ArgumentException("Column is full");
+        if (TheBoard[column] != 0) throw new ArgumentException($"Column {column+1} is full");
 
         // Drop the piece in
         var landingSpot = column;

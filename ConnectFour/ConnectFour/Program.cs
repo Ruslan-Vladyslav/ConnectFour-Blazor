@@ -8,6 +8,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<GameState>();
+builder.Services.AddSingleton<GamePlayer>();
 
 var app = builder.Build();
 

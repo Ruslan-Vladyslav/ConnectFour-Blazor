@@ -1,6 +1,7 @@
 ﻿@page "/game"
 @rendermode InteractiveServer
 
+@inject GamePlayer GamePlayer
 @inject GameState State
 @inject IJSRuntime JS
 @using System.Drawing
@@ -21,7 +22,7 @@
 
 <div class="d-flex justify-content-between align-items-center text-center" style="width: 100%; height: 100%;">
     <div class="d-flex flex-column justify-content-center align-items-center" style="flex-basis: 30%; text-align: center;">
-        <p class="mb-1 mt-5" style="font-size: 25px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;">Player 1 pieces</p>
+        <p class="mb-1 mt-5" style="font-size: 25px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;">Player @GamePlayer.Player1.Name pieces</p>
         <div style="position: relative; display: inline-block;">
             <span style="width: 60px; height: 60px; border-radius: 50%;
                     background-color: var(--player1);
@@ -32,7 +33,7 @@
             </span>
         </div>
 
-        <p class="mt-4 mb-1" style="font-size: 25px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;">Player 2 pieces</p>
+        <p class="mt-4 mb-1" style="font-size: 25px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;">Player @GamePlayer.Player2.Name pieces</p>
         <div style="position: relative; display: inline-block;">
             <span style="width: 60px; height: 60px; border-radius: 50%;
                     background-color: var(--player2);
@@ -114,7 +115,10 @@
     private string winnerMessage = string.Empty;
     private string errorMessage = string.Empty;
 
-    private string CurrentTurn => (winnerMessage == string.Empty) ? $"Player {State.PlayerTurn}'s Turn" : "";
+
+
+    private string CurrentTurn => string.IsNullOrEmpty(winnerMessage)
+            ? $"{(State.PlayerTurn == 1 ? GamePlayer.Player1.Name : GamePlayer.Player2.Name)}'s Turn" : "";
 
     private bool isAnimating = false;
 
@@ -124,11 +128,8 @@
     [Parameter]
     public Color BoardColor { get; set; } = ColorTranslator.FromHtml("black");
 
-    [Parameter]
-    public Color Player1Color { get; set; } = ColorTranslator.FromHtml("red");
-
-    [Parameter]
-    public Color Player2Color { get; set; } = ColorTranslator.FromHtml("blue");
+    public Color Player1Color => ColorTranslator.FromHtml(GamePlayer.Player1.Color);
+    public Color Player2Color => ColorTranslator.FromHtml(GamePlayer.Player2.Color);
 
 
     private async void PlayPiece(byte col)
@@ -157,8 +158,10 @@
 
             winnerMessage = State.CheckForWin() switch
             {
-                GameState.WinState.Player1_Wins => "Player 1 Wins!",
-                GameState.WinState.Player2_Wins => "Player 2 Wins!",
+                GameState.WinState.Player1_Wins => $"Player {GamePlayer.Player1.Name} Wins!",
+
+                GameState.WinState.Player2_Wins => $"Player {GamePlayer.Player2.Name} Wins!",
+
                 GameState.WinState.Tie => "It's a tie!",
                 _ => ""
             };
