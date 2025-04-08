@@ -1,0 +1,260 @@
+﻿@page "/game"
+@using System.Drawing
+
+@inject GamePlayer GamePlayer
+@inject GameState State
+@inject PlayerAI PlayerAI
+@inject NavigationManager Navigation
+
+<PageTitle>ConnectFourGame</PageTitle>
+
+
+<HeadContent>
+    <style>
+        :root {
+            --board-bg: @ColorTranslator.ToHtml(BoardColor);
+            --player1: @ColorTranslator.ToHtml(Player1Color);
+            --player2: @ColorTranslator.ToHtml(Player2Color);
+        }
+    </style>
+</HeadContent>
+
+
+<div class="d-flex flex-column-reverse flex-lg-row justify-content-between align-items-center text-center" style="width: 100%; height: 100%;">
+    <div class="d-flex flex-column justify-content-center align-items-center" style="text-align: center; width: 50%;">
+        <div class="d-flex justify-content-between align-items-center w-100 left-class">
+            <div class="text-center">
+                <p style="font-size: 22px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; margin-bottom: 5px;">
+                    Player @GamePlayer.Player1.Name pieces
+                </p>
+                <div style="position: relative; display: inline-block;">
+                    <span style="width: 60px; height: 60px; border-radius: 50%;
+                        background-color: var(--player1);
+                        margin-left: 12px; display: inline-flex;
+                        justify-content: center; align-items: center;
+                        font-weight: bold; font-size: 24px;">
+                        @Player1_pieces
+                    </span>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <p style="font-size: 22px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; margin-bottom: 5px;">
+                    Player @GamePlayer.Player2.Name pieces
+                </p>
+                <div style="position: relative; display: inline-block;">
+                    <span style="width: 60px; height: 60px; border-radius: 50%;
+                        background-color: var(--player2);
+                        margin-left: 12px; display: inline-flex;
+                        justify-content: center; align-items: center;
+                        font-weight: bold; font-size: 24px;">
+                        @Player2_pieces
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column align-items-center mt-4 mb-5">
+            <a href="/rules" target="_blank"
+               class="btn btn-dark mt-3"
+               style="width: 200px; font-size: 18px; border-radius: 30px; display: inline-block; text-align: center;">
+                Game rules
+            </a>
+            <button class="btn btn-dark mt-3"
+                    @onclick="ResetGame"
+                    disabled="@string.IsNullOrEmpty(winnerMessage)"
+                    style="width: 200px; font-size: 18px; border-radius: 30px;">
+                Restart the game
+            </button>
+        </div>
+    </div>
+
+    <div class="d-flex flex-column justify-content-center align-items-center board-side" style="flex-basis: 70%; text-align: center;">
+        <div class="content">
+            <article class="mb-3">
+                <div class="text-center font-weight-bold" style="font-size: 30px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;">
+                    @CurrentTurn
+                </div>
+
+                <div class="text-center font-weight-bold" style="font-size: 30px; color: #003366; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); font-weight: bold; display: flex; align-items: center; justify-content: center;">
+                    @winnerMessage
+                </div>
+            </article>
+
+            <nav class="nav-layout">
+                @for (byte i = 0; i < 7; i++)
+                {
+                    var col = i;
+                    <span title="Click to play a piece"
+                          @onclick="() => PlayPiece(col)"
+                          style="cursor: @(isAnimating ? "not-allowed" : "pointer");
+                             opacity: @(isAnimating ? 0.3 : 1)">
+                        🔽
+                    </span>
+                }
+            </nav>
+
+            <div class="board-layout">
+                <div class="board">
+                    @for (var i = 0; i < 42; i++)
+                    {
+                        <span class="container @GetWinIndex(i)">
+                            <span class="win-cross">@(winPositions.Contains(i) ? "X" : "")</span>
+                        </span>
+                    }
+                </div>
+                @for (var i = 0; i < 42; i++)
+                {
+                    <span class="@pieces[i]"></span>
+                }
+
+                <div class="mt-3 text-center font-weight-bold"
+                     style="font-size: 30px; height: 40px; color: #FF0000; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); font-weight: bold;">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        @errorMessage
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    private string[] pieces = new string[42];
+
+    private string winnerMessage = string.Empty;
+    private string errorMessage = string.Empty;
+
+    private PlayerAI botPlayer = null!;
+
+    private string CurrentTurn => string.IsNullOrEmpty(winnerMessage)
+            ? $"{(State.PlayerTurn == 1 ? GamePlayer.Player1.Name : GamePlayer.Player2.Name)}'s Turn" : "";
+
+    private bool isAnimating = false;
+
+    private int Player1_pieces = 0;
+    private int Player2_pieces = 0;
+
+    [Parameter]
+    public Color BoardColor { get; set; } = ColorTranslator.FromHtml("black");
+
+    public Color Player1Color => ColorTranslator.FromHtml(GamePlayer.Player1.Color);
+    public Color Player2Color => ColorTranslator.FromHtml(GamePlayer.Player2.Color);
+
+    private List<int> winPositions = new List<int>();
+
+
+    private async Task PlayPiece(byte col)
+    {
+        if (isAnimating) return;
+
+        errorMessage = string.Empty;
+
+        try
+        {
+            isAnimating = true;
+
+            var player = State.PlayerTurn;
+            var turn = State.CurrentTurn;
+            byte landingRow = 0;
+
+            landingRow = State.PlayPiece(col);
+            pieces[turn] = $"player{player} col{col} drop{landingRow}";
+
+            if (player == 1)
+                Player1_pieces++;
+            else
+                Player2_pieces++;
+
+            await Task.Delay(1500);
+
+            winnerMessage = State.CheckForWin() switch
+            {
+                GameState.WinState.Player1_Wins => $"Player {GamePlayer.Player1.Name} Wins!",
+                GameState.WinState.Player2_Wins => $"Player {GamePlayer.Player2.Name} Wins!",
+                GameState.WinState.Tie => "It's a tie!",
+                _ => ""
+            };
+
+            if (!string.IsNullOrEmpty(winnerMessage))
+            {
+                UpdateWinPositions();
+            }
+        }
+        catch (ArgumentException ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isAnimating = false;
+            StateHasChanged();
+
+            if (string.IsNullOrEmpty(winnerMessage) && State.PlayerTurn == 2 && GamePlayer.Player2.IsAI)
+            {
+                var move = botPlayer.GetBestMove(PlayerAI.AiDifficulty);
+                await InvokeAsync(() => PlayPiece((byte)move));
+            }
+        }
+    }
+
+    private void UpdateWinPositions()
+    {
+        winPositions.Clear();
+
+        var winState = State.CheckForWin();
+
+        if (winState == GameState.WinState.Player1_Wins || winState == GameState.WinState.Player2_Wins)
+        {
+            foreach (var scenario in GameState.WinningPlaces)
+            {
+                int player = State.TheBoard[scenario[0]];
+
+                if (player != 0 &&
+                    State.TheBoard[scenario[1]] == player &&
+                    State.TheBoard[scenario[2]] == player &&
+                    State.TheBoard[scenario[3]] == player &&
+                    ((winState == GameState.WinState.Player1_Wins && player == 1) ||
+                     (winState == GameState.WinState.Player2_Wins && player == 2)))
+                {
+                    winPositions.AddRange(scenario);
+                    break;
+                }
+            }
+        }
+    }
+
+    private string GetWinIndex(int index)
+    {
+        return winPositions.Contains(index) ? "winning" : "";
+    }
+
+    protected override void OnInitialized()
+    {
+        botPlayer = new PlayerAI(State);
+        State.ResetBoard();
+    }
+
+    private void NavigateToRules()
+    {
+
+
+
+        Navigation.NavigateTo("/rules");
+        //await JS.InvokeVoidAsync("openInNewTab", "/rules");
+    }
+
+    void ResetGame()
+    {
+        winPositions = new();
+        State.ResetBoard();
+        winnerMessage = string.Empty;
+        errorMessage = string.Empty;
+        pieces = new string[42];
+        Player1_pieces = 0;
+        Player2_pieces = 0;
+    }
+}

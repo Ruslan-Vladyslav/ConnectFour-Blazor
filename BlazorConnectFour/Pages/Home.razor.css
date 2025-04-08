@@ -1,0 +1,133 @@
+﻿
+h1.fw-bold {
+    font-size: 2rem;
+    color: #333;
+}
+
+p.text-muted {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+button.btn-dark {
+    background-color: #343a40;
+    color: white;
+    font-size: 18px;
+    border-radius: 30px;
+    width: 220px;
+    height: 55px;
+    margin-top: 20px;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+button.btn-dark:hover {
+    background-color: #495057;
+}
+
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dialog-box {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 500px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+.dialog-box .form-container {
+    flex: 1; 
+    overflow-y: auto;
+    width: 100%;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.button-container button {
+    width: 48%;
+    margin: 5px 0;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+}
+
+.form-select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+}
+
+.form-control, .form-select {
+    width: 100%;
+}
+
+.alert.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+.dialog-overlay {
+    opacity: 0;
+    animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 530px) {
+    .dialog-box {
+        width: 90%; 
+        max-width: 480px; 
+        min-height: 380px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .button-container button {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+    }
+}
+
