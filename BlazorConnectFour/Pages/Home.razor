@@ -70,7 +70,7 @@
                             <select class="form-select ms-3" style="width: 160px;" @bind="PlayerAI.AiDifficulty">
                                 <option value="1">Easy</option>
                                 <option value="3">Moderate</option>
-                                <option value="7">Hard</option>
+                                <option value="6">Hard</option>
                             </select>
                         } else
                         {
@@ -206,6 +206,6 @@
             return;
         }
 
-        Navigation.NavigateTo("/ConnectFour-Blazor/game");
+        Navigation.NavigateTo("game");
     }
 }
