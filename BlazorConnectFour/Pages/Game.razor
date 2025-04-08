@@ -123,6 +123,8 @@
 
 @code {
 
+
+
     private string[] pieces = new string[42];
 
     private string winnerMessage = string.Empty;
@@ -234,18 +236,33 @@
 
     protected override void OnInitialized()
     {
+        if (!IsValidPlayerData())
+        {
+            Navigation.NavigateTo("/", true);
+        }
+
         botPlayer = new PlayerAI(State);
         State.ResetBoard();
     }
 
-    private void NavigateToRules()
+
+    private bool IsValidPlayerData()
     {
+        if (string.IsNullOrWhiteSpace(GamePlayer?.Player1?.Name)) return false;
 
+        if (string.IsNullOrWhiteSpace(GamePlayer?.Player2?.Name)) return false;
 
+        if (string.IsNullOrWhiteSpace(GamePlayer?.Player1?.Color)) return false;
 
-        Navigation.NavigateTo("/rules");
-        //await JS.InvokeVoidAsync("openInNewTab", "/rules");
+        if (string.IsNullOrWhiteSpace(GamePlayer?.Player2?.Color)) return false;
+
+        if (GamePlayer.Player1.Name == GamePlayer.Player2.Name) return false;
+
+        if (GamePlayer.Player1.Color == GamePlayer.Player2.Color) return false;
+
+        return true;
     }
+
 
     void ResetGame()
     {
