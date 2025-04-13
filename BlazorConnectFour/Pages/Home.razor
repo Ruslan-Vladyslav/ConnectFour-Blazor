@@ -3,113 +3,99 @@
 @inject NavigationManager Navigation
 @inject GamePlayer GamePlayers
 @inject PlayerAI PlayerAI
+@inject GameState State
 
 <PageTitle>Home</PageTitle>
 
 
-<div class="text-center mt-5">
-    <div>
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="text-center">
         <h1 class="fw-bold">🎯 Connect Four Game</h1>
         <p class="text-muted">The classic game of strategy, fun, and four-in-a-row battles!</p>
 
-        <hr class="w-25 mx-auto my-4" />
+        <hr class="w-100 my-4" />
 
         <p class="lead">Ready to challenge a friend or take on the AI?</p>
         <p>Select your gameplay mode and let the game begin!</p>
+
+        <button class="btn btn-dark d-flex justify-content-center align-items-center mx-auto mt-4"
+                style="width: 220px; height: 55px; font-size: 18px; border-radius: 30px;"
+                @onclick="() => ShowDialog(false)">
+            <span>Player vs Player</span>
+            <i class="bi bi-people-fill ms-2 fs-5"></i>
+        </button>
+
+        <button class="btn btn-dark d-flex justify-content-center align-items-center mx-auto mt-3"
+                style="width: 220px; height: 55px; font-size: 18px; border-radius: 30px;"
+                @onclick="() => ShowDialog(true)">
+            <span>Player vs AI</span>
+            <i class="bi bi-robot ms-2 fs-5"></i>
+        </button>
+
+        <p class="mt-4 text-muted" style="font-size: 14px; margin-bottom: 50px;">
+            If not ready to play then go check the game rules and tips!
+        </p>
     </div>
-
-    <button class="btn btn-dark d-flex justify-content-center align-items-center mx-auto mt-4"
-            style="width: 220px; height: 55px; font-size: 18px; border-radius: 30px;"
-            @onclick="() => ShowDialog(false)">
-        <span>Player vs Player</span>
-        <i class="bi bi-people-fill ms-2 fs-5"></i>
-    </button>
-
-    <button class="btn btn-dark d-flex justify-content-center align-items-center mx-auto mt-3"
-            style="width: 220px; height: 55px; font-size: 18px; border-radius: 30px;"
-            @onclick="() => ShowDialog(true)">
-        <span>Player vs AI</span>
-        <i class="bi bi-robot ms-2 fs-5"></i>
-    </button>
-
-    <br />
-
-    <p class="mt-4 text-muted" style="font-size: 14px;">
-        If not ready to play then go check the game rules and tips!
-    </p>
 </div>
 
-@if (isDialogVisible)
-{
-    <div class="dialog-overlay">
-        <div class="dialog-box" style="width: 500px; height: 400px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-                <h4 class="text-center fw-bold mb-3">Enter Player's Names</h4>
 
-                <div class="mb-3 text-start">
-                    <label for="player1" class="form-label">Player 1: Enter your name</label>
-                    <div class="d-flex align-items-center">
-                        <input type="text" id="player1" class="form-control" placeholder="Type here ..." @bind="GamePlayers.Player1.Name" />
-                        <select class="form-select ms-3" style="width: 160px;" @bind="GamePlayers.Player1.Color">
-                            <option value="">Disc Color</option>
-                            <option value="Red">Red</option>
-                            <option value="Yellow">Yellow</option>
-                            <option value="Green">Green</option>
-                            <option value="Blue">Blue</option>
-                            <option value="Purple">Purple</option>
-                        </select>
-                    </div>
-                </div>
+<CustomDialog IsOpen="@isDialogOpen" OnConfirm="@EventCallback.Factory.Create(this, ValidateNames)">
+    <h4 class="text-center fw-bold mb-3">Enter Player's Names</h4>
 
-                <div class="mb-3 text-start">
-                    <label for="player2" class="form-label">@(GamePlayers.Player2.IsAI ? "Opponent Name" : "Player 2: Enter your name")</label>
-                    <div class="d-flex align-items-center">
-                        <input type="text" id="player2" class="form-control" placeholder="@(GamePlayers.Player2.IsAI ? "AI" : "Type here ...")" @bind="GamePlayers.Player2.Name" disabled="@GamePlayers.Player2.IsAI" />
-                        @if (GamePlayers.Player2.IsAI)
-                        {
-                            <select class="form-select ms-3" style="width: 160px;" @bind="PlayerAI.AiDifficulty">
-                                <option value="1">Easy</option>
-                                <option value="3">Moderate</option>
-                                <option value="6">Hard</option>
-                            </select>
-                        } else
-                        {
-                            <select class="form-select ms-3" style="width: 160px;" @bind="GamePlayers.Player2.Color" disabled="@GamePlayers.Player2.IsAI">
-                                <option value="">Disc Color</option>
-                                <option value="Red">Red</option>
-                                <option value="Yellow">Yellow</option>
-                                <option value="Green">Green</option>
-                                <option value="Blue">Blue</option>
-                                <option value="Purple">Purple</option>
-                            </select>
-                        }
-                    </div>
-                </div>
-
-                @if (!string.IsNullOrEmpty(ErrorMessage))
-                {
-                    <div class="alert alert-danger text-center">
-                        @ErrorMessage
-                    </div>
-                }
-            </div>
-
-            <div class="button-container text-center mt-3">
-                <button class="btn btn-dark" style="width: 200px; font-size: 15px; border-radius: 30px;" @onclick="ValidateNames">
-                    Continue
-                </button>
-
-                <button class="btn btn-dark" @onclick="CloseDialog" style="width: 200px; font-size: 15px; border-radius: 30px;">
-                    Close
-                </button>
-            </div>
+    <div class="mb-3 text-start">
+        <label for="player1" class="form-label">Player 1: Enter your name</label>
+        <div class="d-flex align-items-center">
+            <input type="text" id="player1" class="form-control" placeholder="Type here ..." @bind="GamePlayers.Player1.Name" />
+            <select class="form-select ms-3" style="width: 160px;" @bind="GamePlayers.Player1.Color">
+                <option value="">Disc Color</option>
+                <option value="Red">Red</option>
+                <option value="Yellow">Yellow</option>
+                <option value="Green">Green</option>
+                <option value="Blue">Blue</option>
+                <option value="Purple">Purple</option>
+            </select>
         </div>
     </div>
-}
+
+    <div class="mb-3 text-start">
+        <label for="player2" class="form-label">@(GamePlayers.Player2.IsAI ? "Opponent Name" : "Player 2: Enter your name")</label>
+        <div class="d-flex align-items-center">
+            <input type="text" id="player2" class="form-control" placeholder="@(GamePlayers.Player2.IsAI ? "AI" : "Type here ...")" @bind="GamePlayers.Player2.Name" disabled="@GamePlayers.Player2.IsAI" />
+            @if (GamePlayers.Player2.IsAI)
+            {
+                <select class="form-select ms-3" style="width: 160px;" @bind="PlayerAI.AiDifficulty">
+                    <option value="1">Easy</option>
+                    <option value="3">Moderate</option>
+                    <option value="5">Hard</option>
+                </select>
+            }
+            else
+            {
+                <select class="form-select ms-3" style="width: 160px;" @bind="GamePlayers.Player2.Color" disabled="@GamePlayers.Player2.IsAI">
+                    <option value="">Disc Color</option>
+                    <option value="Red">Red</option>
+                    <option value="Yellow">Yellow</option>
+                    <option value="Green">Green</option>
+                    <option value="Blue">Blue</option>
+                    <option value="Purple">Purple</option>
+                </select>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-danger text-center">
+            @ErrorMessage
+        </div>
+    }
+</CustomDialog>
+
 
 
 @code {
-    private bool isDialogVisible = false;
+    private bool isDialogOpen = false;
+
     private string ErrorMessage { get; set; } = String.Empty;
 
 
@@ -125,12 +111,7 @@
 
         if (IsAI) GamePlayers.Player2.Name = "AI";
 
-        isDialogVisible = true;
-    }
-
-    private void CloseDialog()
-    {
-        isDialogVisible = false;
+        isDialogOpen = true;
     }
 
     private string GetRandColor(string excludedColor)
@@ -173,15 +154,15 @@
             return;
         }
 
-        if (Player1Trim.Length > 10)
+        if (Player1Trim.Length > 15)
         {
-            ErrorMessage = "Player 1's name must be 10 characters or less.";
+            ErrorMessage = "Player 1's name must be 15 characters or less.";
             return;
         }
 
-        if (Player2Trim.Length > 10)
+        if (Player2Trim.Length > 15)
         {
-            ErrorMessage = "Player 2's name must be 10 characters or less.";
+            ErrorMessage = "Player 2's name must be 15 characters or less.";
             return;
         }
 
@@ -205,6 +186,10 @@
             ErrorMessage = "Player 1 and Player 2 cannot have the same color.";
             return;
         }
+
+
+        if (State.startingPlayer != 1 && GamePlayers.Player2.IsAI)
+            State.startingPlayer = 1;
 
         Navigation.NavigateTo("game");
     }

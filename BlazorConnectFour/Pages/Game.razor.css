@@ -253,20 +253,129 @@ span.container {
     }
 }
 
+.bot-thinking-icon {
+    margin-left: 15px;
+    font-size: 28px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.wins_style {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    background-color: #444;
+    padding: 6px 12px;
+    border-radius: 8px;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
 .win-cross {
     color: black;
     font-weight: 900;
     padding-top: 15px;
 }
 
+.style_pieces {
+    font-size: 22px;
+    color: #003366;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.difficulty_style {
+    margin: 30px 0px 0px 0px;
+}
+
+.main_left_content {
+    text-align: center;
+    background-color: #f9f9f9;
+    border: 2px solid #ccc;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 50%;
+    margin: 100px 0px 0px 0px;
+}
+
+.hr_game {
+    margin-top: 5px;
+    margin-bottom: 30px;
+}
+
+.dialog-content-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; 
+    height: 100%;
+    text-align: center;
+}
+
+.game-over-title {
+    font-size: 30px;
+    font-weight: 900;
+    color: #ff4444;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+    margin-top: 75px;
+    margin-bottom: 20px;
+}
+
+
+
 
 @media (max-width: 1100px) {
     .d-flex {
         flex-direction: column-reverse;
     }
+
+    .style_pieces {
+        margin-top: 30px;
+    }
+
+    .pieces_content {
+        width: 100%;
+    }
+
+    .difficulty_style {
+        margin-top: 50px;
+    }
+
+    .hr_game {
+        margin-bottom: 10px;
+    }
+
+    .style_pieces_1 {
+        margin-top: 0px;
+    }
+
+    .main_left_content {
+        max-width: 100%;
+        margin-top: 30px;
+    }
 }
 
+
 @media (max-width: 500px) {
+    .main_left_content {
+        padding: 0px;
+        margin: 15px 30px 40px 30px;
+    }
+
     .left-class {
         padding: 0;
     }
@@ -287,6 +396,33 @@ span.container {
     .board-side .content {
         width: 100%; 
         height: 100%; 
+        max-width: 100%;
+        max-height: 100%;
+        font-size: 3vw;
+    }
+}
+
+@media (max-width: 400px) {
+    .left-class {
+        padding: 0;
+    }
+
+    .board-layout {
+        margin-left: 10px;
+    }
+
+    .nav-layout {
+        margin-left: 10px;
+    }
+
+    .board-side {
+        height: 55%;
+        flex-basis: 80%;
+    }
+
+    .board-side .content {
+        width: 100%;
+        height: 100%;
         max-width: 100%;
         max-height: 100%;
         font-size: 3vw;
