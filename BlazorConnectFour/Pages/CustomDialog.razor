@@ -1,0 +1,42 @@
+﻿﻿
+@if (IsOpen)
+{
+    <div class="dialog-overlay">
+        <div class="dialog-box" style="width: 500px; height: 390px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                @ChildContent
+            </div>
+
+            <div class="button-container text-center mt-3">
+                @if (OnConfirm is not null)
+                {
+                    <button class="btn btn-dark" style="width: 200px; font-size: 15px; border-radius: 30px;" @onclick="HandleConfirm">
+                        Continue
+                    </button>
+                }
+
+                <button class="btn btn-dark" @onclick="CloseDialog" style="width: 200px; font-size: 15px; border-radius: 30px;">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback? OnConfirm { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+
+    private async Task HandleConfirm()
+    {
+        if (OnConfirm.HasValue)
+            await OnConfirm.Value.InvokeAsync();
+    }
+
+    private void CloseDialog()
+    {
+        IsOpen = false;
+    }
+}

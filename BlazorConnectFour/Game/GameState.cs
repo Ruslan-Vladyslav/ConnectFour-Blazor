@@ -19,10 +19,19 @@ public class GameState
         Tie = 3
     }
 
+
+    public int startingPlayer = 1;
+
+    public void ChangePlayerMove()
+    {
+        startingPlayer = (startingPlayer == 1) ? 2 : 1;
+    }
+
     /// <summary>
     /// The player whose turn it is.  By default, player 1 starts first
     /// </summary>
-    public int PlayerTurn => TheBoard.Count(x => x != 0) % 2 + 1;
+    //public int PlayerTurn => TheBoard.Count(x => x != 0) % 2 + 1;
+    public int PlayerTurn => TheBoard.Count(x => x != 0) % 2 == 0 ? startingPlayer : 3 - startingPlayer;
 
     /// <summary>
     /// Number of turns completed and pieces played so far in the game

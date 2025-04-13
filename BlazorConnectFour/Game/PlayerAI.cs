@@ -12,6 +12,18 @@ public class PlayerAI
     }
 
 
+    public string GetDifficulty()
+    {
+        return AiDifficulty switch
+        {
+            1 => "Easy",
+            3 => "Moderate",
+            5 => "Hard",
+            _ => "Unknown"
+        };
+    }
+
+
     public byte GetBestMove(int depth)
     {
         var bestScore = int.MinValue;
