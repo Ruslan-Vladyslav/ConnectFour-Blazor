@@ -1,10 +1,10 @@
-﻿@page "/game"
-@using System.Drawing
+﻿@using System.Drawing
 
 @inject GamePlayer GamePlayer
 @inject GameState State
 @inject PlayerAI PlayerAI
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>ConnectFourGame</PageTitle>
 
@@ -175,12 +175,15 @@
 
 @code {
     private string[] pieces = new string[42];
-
     private List<int> winPositions = new List<int>();
+    private string JsAudioFuncName = "playSound";
+
 
     private string winnerMessage = string.Empty;
     private string errorMessage = string.Empty;
+
     private string CurrentTurn => string.IsNullOrEmpty(winnerMessage)
+
             ? $"{(State.PlayerTurn == 1 ? GamePlayer.Player1.Name : GamePlayer.Player2.Name)}'s Turn" : "";
 
     private bool isAnimating = false;
@@ -195,6 +198,7 @@
     public Color Player2Color => ColorTranslator.FromHtml(GamePlayer.Player2.Color);
 
     private PlayerAI botPlayer = null!;
+    private GameState.WinState winnerState;
 
 
     private async Task PlayPiece(byte col)
@@ -217,7 +221,10 @@
 
             UpdateValues(player, false);
 
-            await Task.Delay(1400);
+            await InvokeAsync(StateHasChanged);
+            await JS.InvokeVoidAsync(JsAudioFuncName, "sounds/disc_fall.mp3");
+
+            await Task.Delay(1000);
 
             CheckGameResult();
 
@@ -225,9 +232,17 @@
             {
                 UpdateWinPositions();
 
+                await Task.Delay(500);
+
+                if (winnerState == GameState.WinState.Player2_Wins && GamePlayer.Player2.IsAI)
+                    _ = JS.InvokeVoidAsync(JsAudioFuncName, "sounds/bot_win.mp3");
+                else
+                    _ = JS.InvokeVoidAsync(JsAudioFuncName, "sounds/player_win.mp3");
+
                 if (!GamePlayer.Player2.IsAI)
 
                     State.ChangePlayerMove();
+
 
                 UpdateValues(player, true);
                 ShowWinDialog();
@@ -242,11 +257,9 @@
             isAnimating = false;
 
             StateHasChanged();
-
             await AIMakeMove();
         }
     }
-
 
     private void UpdateValues(int player, bool wins)
     {
@@ -258,7 +271,9 @@
 
     private void CheckGameResult()
     {
-        winnerMessage = State.CheckForWin() switch
+        winnerState = State.CheckForWin();
+
+        winnerMessage = winnerState switch
         {
             GameState.WinState.Player1_Wins => $"Player {GamePlayer.Player1.Name} Wins!",
             GameState.WinState.Player2_Wins => $"Player {GamePlayer.Player2.Name} Wins!",
@@ -267,17 +282,15 @@
         };
     }
 
-
     private async Task AIMakeMove()
     {
         if (string.IsNullOrEmpty(winnerMessage) && State.PlayerTurn == 2 && GamePlayer.Player2.IsAI)
         {
-            var move = botPlayer.GetBestMove(PlayerAI.AiDifficulty);
+            var move = await Task.Run(() => botPlayer.GetBestMove(PlayerAI.AiDifficulty));
 
             await InvokeAsync(() => PlayPiece((byte)move));
         }
     }
-
 
     private void UpdateWinPositions()
     {
@@ -299,12 +312,12 @@
                      (winState == GameState.WinState.Player2_Wins && player == 2)))
                 {
                     winPositions.AddRange(scenario);
+
                     break;
                 }
             }
         }
     }
-
 
     private void ShowWinDialog()
     {
@@ -337,7 +350,6 @@
             && p1.Name != p2.Name
             && p1.Color != p2.Color;
     }
-
 
     private void ResetGame()
     {

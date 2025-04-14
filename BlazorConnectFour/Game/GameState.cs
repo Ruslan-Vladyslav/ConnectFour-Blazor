@@ -216,33 +216,6 @@ public class GameState
         return true;
     }
 
-    public int EvaluateBoard(GameState state)
-    {
-        int score = 0;
-
-        foreach (var group in WinningPlaces)
-        {
-            var line = group.Select(pos => state.TheBoard[pos]).ToList();
-
-            int player2Count = line.Count(p => p == 2);
-            int player1Count = line.Count(p => p == 1);
-
-
-            if (player2Count > 0 && player1Count == 0)
-            {
-                //score += (int)Math.Pow(10, player2Count);
-                score += player2Count * 10;
-            }
-            else if (player1Count > 0 && player2Count == 0)
-            {
-                //score -= (int)Math.Pow(10, player1Count);
-                score -= player1Count * 10;
-            }
-        }
-
-        return score;
-    }
-
     public List<byte> GetAvailableColumns(GameState state)
     {
         var freeColumn = new List<byte>();

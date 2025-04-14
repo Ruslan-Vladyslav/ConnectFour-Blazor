@@ -263,22 +263,24 @@ button.btn-dark[b-3rfbv9h2vd] {
     transition: background-color 0.3s;
 }
 
-    button.btn-dark:hover[b-3rfbv9h2vd] {
-        background-color: #495057;
-    }
+button.btn-dark:hover[b-3rfbv9h2vd] {
+    background-color: #495057;
+}
 
 .button-container[b-3rfbv9h2vd] {
     display: flex;
-    justify-content: space-between;
     width: 100%;
     margin-top: 20px;
+    justify-content: center;
+    align-items: center;
     gap: 12px;
 }
 
-    .button-container button[b-3rfbv9h2vd] {
-        width: 48%;
-        margin: 5px 0;
-    }
+.button-container button[b-3rfbv9h2vd] {
+    width: 48%;
+    margin: 5px 0;
+    border-radius: 30px;
+}
 
 
 @media (max-width: 530px) {
