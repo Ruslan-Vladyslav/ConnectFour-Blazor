@@ -12,7 +12,6 @@ public class PlayerAI
     }
 
 
-
     public string GetDifficulty()
     {
         return AiDifficulty switch
@@ -24,7 +23,6 @@ public class PlayerAI
         };
     }
 
-
     public byte GetBestMove(int depth)
     {
         var bestScore = int.MinValue;
@@ -32,7 +30,7 @@ public class PlayerAI
         int beta = int.MaxValue;
         byte bestMove = 0;
 
-        foreach (var col in _state.GetAvailableColumns(_state))
+        foreach (var col in _state.GetAvailableColumns(_state).OrderBy(c => Math.Abs(3 - c)))
         {
             var copyState = _state.Clone();
 
@@ -47,7 +45,6 @@ public class PlayerAI
                 bestMove = col;
             }
         }
-
         return bestMove;
     }
 
@@ -55,11 +52,11 @@ public class PlayerAI
     {
         var result = state.CheckForWin();
 
-        if (result == GameState.WinState.Player2_Wins) return 1000;
-        if (result == GameState.WinState.Player1_Wins) return -1000;
-        if (result == GameState.WinState.Tie || depth == 0) return state.EvaluateBoard(state);
+        if (result == GameState.WinState.Player2_Wins) return 100000;
+        if (result == GameState.WinState.Player1_Wins) return -100000;
+        if (result == GameState.WinState.Tie || depth == 0) return EvaluateBoard(state);
 
-        var availableMoves = _state.GetAvailableColumns(state);
+        var availableMoves = state.GetAvailableColumns(state);
 
         if (isMaximizing)
         {
@@ -97,5 +94,33 @@ public class PlayerAI
             }
             return bestScore;
         }
+    }
+
+    private int EvaluateBoard(GameState state)
+    {
+        int score = 0;
+
+        foreach (var group in GameState.WinningPlaces)
+        {
+            var line = group.Select(pos => state.TheBoard[pos]).ToList();
+
+            int player2Count = line.Count(p => p == 2);
+            int player1Count = line.Count(p => p == 1);
+
+            if (player2Count > 0)
+            {
+                if (player2Count == 3) score += 1000;
+                else if (player2Count == 2) score += 100;
+                else score += 10;
+            }
+            else if (player1Count > 0)
+            {
+                if (player1Count == 3) score -= 1200;
+                else if (player1Count == 2) score -= 120;
+                else score -= 10;
+            }
+        }
+
+        return score;
     }
 }

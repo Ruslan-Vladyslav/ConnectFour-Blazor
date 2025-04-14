@@ -5,6 +5,7 @@
 @inject GameState State
 @inject PlayerAI PlayerAI
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>ConnectFourGame</PageTitle>
 
@@ -170,6 +171,7 @@
 @code {
     private string[] pieces = new string[42];
     private List<int> winPositions = new List<int>();
+    private string JsAudioFuncName = "playSound";
 
     private string winnerMessage = string.Empty;
     private string errorMessage = string.Empty;
@@ -189,6 +191,7 @@
     public Color Player2Color => ColorTranslator.FromHtml(GamePlayer.Player2.Color);
 
     private PlayerAI botPlayer = null!;
+    private GameState.WinState winnerState;
 
 
     private async Task PlayPiece(byte col)
@@ -211,13 +214,23 @@
 
             UpdateValues(player, false);
 
-            await Task.Delay(1400);
+            await InvokeAsync(StateHasChanged);
+            await JS.InvokeVoidAsync(JsAudioFuncName, "sounds/disc_fall.mp3");
+
+            await Task.Delay(1000);
 
             CheckGameResult();
 
             if (!string.IsNullOrEmpty(winnerMessage))
             {
                 UpdateWinPositions();
+
+                await Task.Delay(500);
+
+                if (winnerState == GameState.WinState.Player2_Wins && GamePlayer.Player2.IsAI)
+                    _ = JS.InvokeVoidAsync(JsAudioFuncName, "sounds/bot_win.mp3");
+                else
+                    _ = JS.InvokeVoidAsync(JsAudioFuncName, "sounds/player_win.mp3");
 
                 if (!GamePlayer.Player2.IsAI)
                     State.ChangePlayerMove();
@@ -249,7 +262,9 @@
 
     private void CheckGameResult()
     {
-        winnerMessage = State.CheckForWin() switch
+        winnerState = State.CheckForWin();
+
+        winnerMessage = winnerState switch
         {
             GameState.WinState.Player1_Wins => $"Player {GamePlayer.Player1.Name} Wins!",
             GameState.WinState.Player2_Wins => $"Player {GamePlayer.Player2.Name} Wins!",
@@ -262,7 +277,8 @@
     {
         if (string.IsNullOrEmpty(winnerMessage) && State.PlayerTurn == 2 && GamePlayer.Player2.IsAI)
         {
-            var move = botPlayer.GetBestMove(PlayerAI.AiDifficulty);
+            var move = await Task.Run(() => botPlayer.GetBestMove(PlayerAI.AiDifficulty));
+
             await InvokeAsync(() => PlayPiece((byte)move));
         }
     }
@@ -298,7 +314,6 @@
         isDialogOpen = true;
     }
 
-
     private string GetWinIndex(int index) => winPositions.Contains(index) ? "winning" : "";
 
     protected override void OnInitialized()
@@ -324,7 +339,6 @@
             && p1.Name != p2.Name
             && p1.Color != p2.Color;
     }
-
 
     private void ResetGame()
     {
