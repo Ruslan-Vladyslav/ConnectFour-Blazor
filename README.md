@@ -24,7 +24,8 @@ You can play the game live in your browser: [link](https://ruslan-vladyslav.gith
 -  Visual highlights for winning moves
 -  Restart button for quick new games
 -  Responsive design for desktops and tablets
--  No page reloads or back-end required
+-  Sound effects for game actions
+-  Players can choose their disc colors
 
 
 ## About project
@@ -36,6 +37,7 @@ You can play the game live in your browser: [link](https://ruslan-vladyslav.gith
 | Framework      | .NET 8 (version 8.0.407)               |
 | System Support | .NET Framework 4.8.1 installed         |
 | Markup/Styling | HTML, CSS                              |
+| JS Interop     | JavaScript (for audio playback)        |
 | Hosting        | GitHub Pages (static web hosting)      |
 | Deployment     | Manual publish to `gh-pages` branch    |
 | Source Control | Git, GitHub                            |
